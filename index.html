@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PhytoStock Maroc</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#fff;--fg:#10261a;--navy:#1b7a3a;--navy-fg:#fff;--muted:#4f6b58;--line:#dcebe0;--card:#f3f9f5;--red:#c62828;--redbg:#fdeaea;--green:#1b7a46;--greenbg:#e6f5ec;--amber:#a15c00;--amberbg:#fff3df;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0b1a12;--fg:#e6f4ea;--navy:#3fbf6b;--navy-fg:#08150d;--muted:#a3c4ad;--line:#234232;--card:#112419;--red:#ff8a80;--redbg:#3a1a1a;--green:#6fd39a;--greenbg:#12301f;--amber:#ffc266;--amberbg:#3a2a10}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0b1a12;--fg:#e6f4ea;--navy:#3fbf6b;--navy-fg:#08150d;--muted:#a3c4ad;--line:#234232;--card:#112419;--red:#ff8a80;--redbg:#3a1a1a;--green:#6fd39a;--greenbg:#12301f;--amber:#ffc266;--amberbg:#3a2a10}
+*{box-sizing:border-box}html,body{margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--navy);z-index:30}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--navy);color:var(--navy-fg);display:flex;align-items:center;gap:10px;padding:12px 16px}
+.top b{font-size:18px;letter-spacing:.3px;flex:1}.burger{background:none;border:1px solid currentColor;color:inherit;border-radius:8px;font-size:20px;padding:2px 10px;cursor:pointer}
+nav{position:fixed;left:0;top:calc(52px + env(safe-area-inset-top,0px));bottom:0;width:230px;background:var(--card);border-right:1px solid var(--line);padding:12px 8px;overflow-y:auto;transform:translateX(-100%);transition:.2s;z-index:15}
+nav.open{transform:none}
+nav button{display:flex;gap:10px;width:100%;text-align:left;background:none;border:0;color:var(--fg);padding:11px 12px;border-radius:8px;font:inherit;cursor:pointer;margin-bottom:2px}
+nav button.on{background:var(--navy);color:var(--navy-fg);font-weight:600}
+main{padding:16px;max-width:1100px;margin:auto}
+h2{margin:4px 0 14px;color:var(--navy);font-size:22px}h3{margin:0 0 10px;font-size:16px;color:var(--navy)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.grid .card{margin:0}.kpi small{color:var(--muted);display:block}.kpi b{font-size:24px;color:var(--navy)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--muted);font-size:12px;text-transform:uppercase}
+td.r,th.r{text-align:right}
+input,select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-width:0;width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.row>*{flex:1 1 150px}
+.btn{background:var(--navy);color:var(--navy-fg);border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;flex:0 0 auto}
+.btn.sec{background:none;color:var(--navy);border:1px solid var(--navy)}.btn.sm{padding:4px 10px}
+.badge{padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.ok{background:var(--greenbg);color:var(--green)}.low{background:var(--amberbg);color:var(--amber)}.out{background:var(--redbg);color:var(--red)}
+.alert{background:var(--redbg);color:var(--red);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.bar{height:10px;background:var(--navy);border-radius:5px}.lbl{display:flex;justify-content:space-between;font-size:13px;margin:8px 0 3px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:var(--navy-fg);padding:10px 18px;border-radius:99px;z-index:40;display:none}
+.inv{background:#fff;color:#10261a;border:1px solid #dcebe0;border-radius:12px;padding:20px}.inv h3{color:#1b7a3a}.inv th{color:#4f6b58}.inv td,.inv th{border-color:#dcebe0}
+.tot{text-align:right;margin-top:10px}.tot div{margin:3px 0}
+@media(min-width:900px){nav{transform:none}main{margin-left:230px;max-width:none;padding:24px 32px}.burger{display:none}main>*{max-width:1000px}}
+@media print{nav,.top,.noprint{display:none!important}main{margin:0}}
+.out nav,.out .burger{display:none}.out main{margin:auto!important}
+</style>
+</head>
+<body class="out">
+<div class="top"><button class="burger" onclick="document.getElementById('nav').classList.toggle('open')" aria-label="Menu">☰</button><b>PhytoStock Maroc</b><span id="co" style="font-size:13px;opacity:.85"></span></div>
+<nav id="nav"></nav>
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+<script>
+const U="https://bixpdqimmczdsdmgrmkw.supabase.co",K="sb_publishable_0I2yno0scJEgD2Dym_p4SA_l7ouk8Qg";
+const sb=supabase.createClient(U,K);
+const PAGES=[["dash","📊","Tableau de bord"],["prod","🧪","Produits"],["stock","🗃️","Gestion de stock"],["cli","🌾","Agriculteurs"],["four","🚚","Fournisseurs"],["vente","🛒","Ventes"],["fact","🧾","Factures"],["rap","📈","Rapports"],["set","⚙️","Paramètres"]];
+let S={view:"dash",user:null,p:[],c:[],f:[],inv:[],ln:[],set:{nom:"Ma boîte phytosanitaire",tva:0,ville:"",ice:"",agrement:""},cart:[],q:"",cat:"",open:null};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dh=n=>(Math.round(n*100)/100).toLocaleString("fr-FR",{maximumFractionDigits:2})+" DH";
+const $=id=>document.getElementById(id);
+const toast=m=>{const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",3000)};
+const run=async p=>{const{data,error}=await p;if(error){toast(error.message);throw error}return data};
+const TODAY=new Date().toISOString().slice(0,10);
+const dd=p=>p.expiration?Math.round((new Date(p.expiration)-new Date(TODAY))/864e5):9999;
+const st=p=>dd(p)<0?'<span class="badge out">Périmé</span>':p.stock<=0?'<span class="badge out">Rupture</span>':p.stock<=p.seuil?'<span class="badge low">Stock faible</span>':dd(p)<=90?'<span class="badge low">Expire bientôt</span>':'<span class="badge ok">En stock</span>';
+const opts=a=>a.map(x=>`<option>${esc(x)}</option>`).join("");
+const cats=()=>[...new Set(S.p.map(p=>p.categorie).filter(Boolean))];
+const invLines=i=>S.ln.filter(l=>l.invoice_id===i.id);
+const invHT=i=>invLines(i).reduce((a,l)=>a+l.quantite*l.prix_unitaire,0);
+const invTTC=i=>invHT(i)*(1+i.tva_rate/100);
+async function load(){const[p,c,f,i,l,s]=await Promise.all([run(sb.from("products").select("*").order("nom")),run(sb.from("customers").select("*").order("nom")),run(sb.from("suppliers").select("*").order("nom")),run(sb.from("invoices").select("*").order("id",{ascending:false})),run(sb.from("invoice_lines").select("*")),run(sb.from("shop_settings").select("*").maybeSingle())]);S.p=p;S.c=c;S.f=f;S.inv=i;S.ln=l;if(s)S.set=s}
+async function boot(){document.body.classList.toggle("out",!S.user);if(S.user){try{await load()}catch(e){}}render()}
+sb.auth.onAuthStateChange((ev,ses)=>{const u=ses?ses.user:null;if((u&&u.id)!==(S.user&&S.user.id)){S.user=u;setTimeout(boot,0)}});
+async function auth(mode){const email=$("em").value.trim(),password=$("pw").value;if(!email||password.length<6){toast("Email et mot de passe (6 caractères min.) requis");return}
+const r=mode==="up"?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+if(r.error){toast(r.error.message);return}if(mode==="up"&&!r.data.session)toast("Compte créé. Vérifiez votre email pour confirmer.")}
+const logout=()=>sb.auth.signOut();
+const go=v=>{S.view=v;S.open=null;$("nav").classList.remove("open");render();scrollTo(0,0)};
+function prodRows(){const q=S.q.toLowerCase();return S.p.filter(p=>(!S.cat||p.categorie===S.cat)&&p.nom.toLowerCase().includes(q)).map(p=>`<tr><td>${esc(p.nom)}</td><td>${esc(p.matiere_active||"—")}</td><td>${esc(p.categorie||"")}</td><td class="r">${dh(p.prix_vente)}</td><td class="r">${p.stock}</td><td>${p.expiration||"—"}</td><td>${st(p)}</td><td><button class="btn sm sec" onclick="delP(${p.id})">Supprimer</button></td></tr>`).join("")||'<tr><td colspan="8">Aucun produit.</td></tr>'}
+function search(){S.q=$("q").value;S.cat=$("cf").value;$("pb").innerHTML=prodRows()}
+const fd=e=>{e.preventDefault();return Object.fromEntries(new FormData(e.target))};
+async function addP(e){const f=fd(e),fo=S.f.find(x=>x.nom===f.four);await run(sb.from("products").insert({nom:f.nom,categorie:f.cat,matiere_active:f.ma||null,prix_achat:+f.achat,prix_vente:+f.prix,stock:+f.stock,seuil:+f.seuil,fournisseur_id:fo?fo.id:null,expiration:f.exp||null}));toast("Produit ajouté ✓");await load();render()}
+async function delP(id){if(confirm("Supprimer ce produit ?")){await run(sb.from("products").delete().eq("id",id));await load();render()}}
+async function adj(id,d){const p=S.p.find(x=>x.id===id);await run(sb.from("products").update({stock:Math.max(0,p.stock+d)}).eq("id",id));await load();render()}
+const addPerson=t=>async e=>{const f=fd(e),o={nom:f.nom,tel:f.tel,ville:f.ville};if(t==="customers")o.culture=f.x||null;await run(sb.from(t).insert(o));toast("Ajouté ✓");await load();render()};
+const addC=addPerson("customers"),addF=addPerson("suppliers");
+function addCart(){const p=S.p.find(x=>x.id===+$("sp").value),q=+$("sq").value;if(!p||q<1)return;if(p.expiration&&dd(p)<0){toast("Produit périmé : vente bloquée");return}const ex=S.cart.find(x=>x.id===p.id),t=(ex?ex.q:0)+q;if(t>p.stock){toast("Stock insuffisant ("+p.stock+" dispo.)");return}if(ex)ex.q=t;else S.cart.push({id:p.id,n:p.nom,q,pu:p.prix_vente});render()}
+const rmCart=i=>{S.cart.splice(i,1);render()};
+async function validate(){if(!S.cart.length){toast("Panier vide");return}const no=await run(sb.rpc("create_sale",{p_client:$("sc").value,p_lines:S.cart.map(l=>({produit_id:l.id,quantite:l.q}))}));S.cart=[];await load();const i=S.inv.find(x=>x.numero===no);S.view="fact";S.open=i?i.id:null;toast("Vente enregistrée : "+no);render()}
+async function setS(e){const f=fd(e);await run(sb.from("shop_settings").upsert({owner:S.user.id,nom:f.nom,ville:f.ville,ice:f.ice,agrement:f.ag,tva:+f.tva}));toast("Paramètres enregistrés ✓");await load();render()}
+function people(t,k,fn,btn){const c=k==="c";return`<h2>${t}</h2><div class="card"><h3>${btn}</h3><form onsubmit="${fn}(event)"><div class="row"><input name="nom" placeholder="Nom / Exploitation" required><input name="tel" placeholder="Téléphone"><input name="ville" placeholder="Ville / Douar">${c?'<input name="x" placeholder="Culture et superficie">':""}<button class="btn">Ajouter</button></div></form></div><div class="card"><div class="tw"><table><tr><th>Nom</th><th>Téléphone</th><th>Ville</th>${c?"<th>Culture</th>":""}</tr>${S[k].map(x=>`<tr><td>${esc(x.nom)}</td><td>${esc(x.tel)}</td><td>${esc(x.ville)}</td>${c?`<td>${esc(x.culture)}</td>`:""}</tr>`).join("")}</table></div></div>`}
+const alerts=()=>{const low=S.p.filter(p=>p.stock<=p.seuil),ex=S.p.filter(p=>p.expiration&&(dd(p)<0||(dd(p)<=90&&p.stock>0)));return low.map(p=>`<div class="alert"><b>${esc(p.nom)}</b> — ${p.stock===0?"rupture":"il reste "+p.stock} (seuil : ${p.seuil})</div>`).join("")+ex.map(p=>`<div class="alert" style="background:var(--amberbg);color:var(--amber)">🗓️ <b>${esc(p.nom)}</b> — ${dd(p)<0?"périmé":"expire dans "+dd(p)+" jours"} (${p.expiration})</div>`).join("")||"Aucune alerte."};
+const bars=o=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1]),m=e[0]?e[0][1]:1;return e.map(([k,v])=>`<div class="lbl"><span>${esc(k)}</span><b>${dh(v)}</b></div><div class="bar" style="width:${v/m*100}%"></div>`).join("")||"Aucune donnée."};
+const V={
+dash(){const ca=S.inv.reduce((a,i)=>a+invTTC(i),0),val=S.p.reduce((a,p)=>a+p.stock*p.prix_achat,0);return`<h2>Tableau de bord</h2><div class="grid"><div class="card kpi"><small>Chiffre d’affaires</small><b>${dh(ca)}</b></div><div class="card kpi"><small>Produits</small><b>${S.p.length}</b></div><div class="card kpi"><small>Valeur du stock</small><b>${dh(val)}</b></div><div class="card kpi"><small>Factures</small><b>${S.inv.length}</b></div></div><div class="card"><h3>⚠️ Alertes stock et péremption</h3>${alerts()}</div>${S.p.length?"":'<div class="card">👋 Bienvenue ! Commencez par ajouter vos <b>fournisseurs</b>, puis vos <b>produits</b>.</div>'}`},
+prod(){return`<h2>Produits</h2><div class="card"><h3>Ajouter un produit</h3><form onsubmit="addP(event)"><div class="row"><input name="nom" placeholder="Nom du produit" required><input name="cat" list="cl" placeholder="Catégorie" required><datalist id="cl">${opts(["Herbicides","Fongicides","Insecticides","Engrais","Semences","Matériel",...cats()])}</datalist><select name="four"><option value="">Fournisseur</option>${opts(S.f.map(f=>f.nom))}</select></div><div class="row"><input name="ma" placeholder="Matière active"><label style="flex:1 1 150px;font-size:12px;color:var(--muted)">Date d’expiration<input name="exp" type="date"></label></div><div class="row"><input name="achat" type="number" step="0.01" min="0" placeholder="Prix d’achat (DH)" required><input name="prix" type="number" step="0.01" min="0" placeholder="Prix de vente (DH)" required><input name="stock" type="number" min="0" placeholder="Stock" required><input name="seuil" type="number" min="0" placeholder="Seuil d’alerte" required><button class="btn">Ajouter</button></div></form></div><div class="card"><div class="row"><input id="q" placeholder="🔍 Rechercher…" value="${esc(S.q)}" oninput="search()"><select id="cf" onchange="search()"><option value="">Toutes les catégories</option>${cats().map(c=>`<option ${S.cat===c?"selected":""}>${esc(c)}</option>`).join("")}</select></div><div class="tw"><table><tr><th>Produit</th><th>Matière active</th><th>Catégorie</th><th class="r">Vente</th><th class="r">Stock</th><th>Expiration</th><th>État</th><th></th></tr><tbody id="pb">${prodRows()}</tbody></table></div></div>`},
+stock(){return`<h2>Gestion de stock</h2><div class="card"><div class="tw"><table><tr><th>Produit</th><th class="r">Quantité</th><th class="r">Seuil</th><th>État</th><th class="r">Valeur</th><th>Mouvement</th></tr>${S.p.map(p=>`<tr><td>${esc(p.nom)}</td><td class="r"><b>${p.stock}</b></td><td class="r">${p.seuil}</td><td>${st(p)}</td><td class="r">${dh(p.stock*p.prix_achat)}</td><td><button class="btn sm sec" onclick="adj(${p.id},-1)">−1</button> <button class="btn sm" onclick="adj(${p.id},1)">+1</button> <button class="btn sm" onclick="adj(${p.id},10)">+10</button></td></tr>`).join("")||'<tr><td colspan="6">Aucun produit.</td></tr>'}</table></div></div>`},
+cli(){return people("Agriculteurs","c","addC","Ajouter un agriculteur")},
+four(){return people("Fournisseurs","f","addF","Ajouter un fournisseur")},
+vente(){const sub=S.cart.reduce((a,l)=>a+l.q*l.pu,0),tva=sub*S.set.tva/100;return`<h2>Ventes</h2><div class="alert" style="background:var(--amberbg);color:var(--amber)">ℹ️ Rappel : vérifier l’homologation ONSSA et le délai avant récolte (DAR) avant chaque vente.</div><div class="card"><h3>Nouvelle vente</h3><div class="row"><select id="sp">${S.p.map(p=>`<option value="${p.id}">${esc(p.nom)} — ${dh(p.prix_vente)} (stock : ${p.stock})</option>`).join("")}</select><input id="sq" type="number" min="1" value="1"><button class="btn" onclick="addCart()">Ajouter au panier</button></div></div><div class="card"><h3>🛒 Panier</h3><div class="tw"><table><tr><th>Produit</th><th class="r">Qté</th><th class="r">Prix unit.</th><th class="r">Total</th><th></th></tr>${S.cart.map((l,i)=>`<tr><td>${esc(l.n)}</td><td class="r">${l.q}</td><td class="r">${dh(l.pu)}</td><td class="r">${dh(l.q*l.pu)}</td><td><button class="btn sm sec" onclick="rmCart(${i})">✕</button></td></tr>`).join("")||'<tr><td colspan="5">Panier vide.</td></tr>'}</table></div><div class="tot"><div>Total HT : <b>${dh(sub)}</b></div><div>TVA (${S.set.tva} %) : <b>${dh(tva)}</b></div><div style="font-size:20px;color:var(--navy)">Total TTC : <b>${dh(sub+tva)}</b></div></div><div class="row" style="margin-top:12px"><select id="sc">${opts(["Client de passage",...S.c.map(c=>c.nom)])}</select><button class="btn" onclick="validate()">Valider la vente</button></div></div>`},
+fact(){if(S.open){const i=S.inv.find(x=>x.id===S.open);if(i){const ht=invHT(i),tva=ht*i.tva_rate/100;return`<div class="noprint row"><button class="btn sec" onclick="S.open=null;render()">← Retour</button><button class="btn" onclick="window.print()">🖨️ Imprimer</button></div><div class="inv"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><h3 style="font-size:22px">${esc(S.set.nom)}</h3>${esc(S.set.ville)}<br>ICE : ${esc(S.set.ice)}<br>${esc(S.set.agrement)}</div><div style="text-align:right"><h3>FACTURE ${esc(i.numero)}</h3>Date : ${i.date.split("-").reverse().join("/")}</div></div><p><b>Agriculteur :</b> ${esc(i.client_nom)}</p><div class="tw"><table><tr><th>Désignation</th><th class="r">Qté</th><th class="r">P.U.</th><th class="r">Total HT</th></tr>${invLines(i).map(l=>`<tr><td>${esc(l.designation)}</td><td class="r">${l.quantite}</td><td class="r">${dh(l.prix_unitaire)}</td><td class="r">${dh(l.quantite*l.prix_unitaire)}</td></tr>`).join("")}</table></div><div class="tot"><div>Total HT : ${dh(ht)}</div><div>TVA (${i.tva_rate} %) : ${dh(tva)}</div><div style="font-size:19px"><b>Net à payer : ${dh(ht+tva)}</b></div></div></div>`}}
+return`<h2>Factures</h2><div class="card"><div class="tw"><table><tr><th>N°</th><th>Date</th><th>Client</th><th class="r">Total TTC</th><th></th></tr>${S.inv.map(i=>`<tr><td>${esc(i.numero)}</td><td>${i.date}</td><td>${esc(i.client_nom)}</td><td class="r">${dh(invTTC(i))}</td><td><button class="btn sm" onclick="S.open=${i.id};render()">Voir</button></td></tr>`).join("")||'<tr><td colspan="5">Aucune facture.</td></tr>'}</table></div></div>`},
+rap(){const by={},cb={};S.ln.forEach(l=>{const v=l.quantite*l.prix_unitaire;by[l.designation]=(by[l.designation]||0)+v;const k=l.categorie||"Autre";cb[k]=(cb[k]||0)+v});return`<h2>Rapports</h2><div class="card"><h3>Meilleures ventes par produit</h3>${bars(by)}</div><div class="card"><h3>Ventes par catégorie</h3>${bars(cb)}</div>`},
+set(){return`<h2>Paramètres</h2><div class="card"><h3>Informations de l’entreprise</h3><form onsubmit="setS(event)"><div class="row"><input name="nom" value="${esc(S.set.nom)}" placeholder="Raison sociale" required><input name="ville" value="${esc(S.set.ville)}" placeholder="Ville"><input name="ice" value="${esc(S.set.ice)}" placeholder="ICE"><input name="ag" value="${esc(S.set.agrement)}" placeholder="N° agrément ONSSA"><input name="tva" type="number" min="0" max="100" step="0.01" value="${S.set.tva}" placeholder="TVA %"></div><button class="btn">Enregistrer</button></form></div><div class="card"><h3>Compte</h3><p style="color:var(--muted)">${esc(S.user.email)}</p><button class="btn sec" onclick="logout()">Se déconnecter</button></div>`}};
+function loginView(){return`<div class="card" style="max-width:380px;margin:40px auto"><h2 style="text-align:center">🌾 PhytoStock Maroc</h2><p style="text-align:center;color:var(--muted)">Connectez-vous ou créez votre compte</p><div class="row"><input id="em" type="email" placeholder="Email" autocomplete="email"></div><div class="row"><input id="pw" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password"></div><div class="row"><button class="btn" onclick="auth('in')">Connexion</button><button class="btn sec" onclick="auth('up')">Créer un compte</button></div></div>`}
+function render(){$("nav").innerHTML=PAGES.map(([id,ic,l])=>`<button class="${S.view===id?"on":""}" onclick="go('${id}')"><span>${ic}</span>${l}</button>`).join("");$("co").textContent=S.user?S.set.nom:"";$("main").innerHTML=S.user?V[S.view]():loginView()}
+render();
+</script>
+</body>
+</html>
